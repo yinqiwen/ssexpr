@@ -1,0 +1,28 @@
+attribute "priority";
+
+namespace test_fbs;
+
+table SubData {
+  id:uint;
+  iid:int;
+  val:ulong;
+  score:float;
+  dscore:double;
+  bv:bool;
+  bb:byte;
+  ubb:ubyte;
+  sv:short;
+  usv:ushort;
+  name:string;
+}
+
+table Data {
+  name:string;
+  value:string;
+  score:double;
+  unit:SubData;
+  x:uint;
+  y:uint;
+}
+
+root_type Data;
