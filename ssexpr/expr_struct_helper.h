@@ -26,39 +26,36 @@
 // };
 // }  // namespace expr_struct
 
-#define PB_FIELD_EACH_INIT(N, i, arg)                                          \
-  {                                                                            \
-    using FIELD_TYPE = decltype(__root_obj->arg());                            \
-    ssexpr::FieldAccessorTable &accessors =                                    \
-        PB_HELPER_TYPE::GetFieldAccessorTable();                               \
-    ssexpr::FieldAccessor field_accessor =                                     \
-        [](const void *v) -> ssexpr::FieldValue {                              \
-      const PB_TYPE *data = (const PB_TYPE *)v;                                \
-      return ssexpr::toFieldValue(data->arg());                                \
-    };                                                                         \
-    ssexpr::FieldAccessorTable value;                                          \
-    if (ssexpr::fillHelperFieldAccessorTable<FIELD_TYPE>(value)) {             \
-      accessors[STRING(arg)] =                                                 \
-          std::pair<ssexpr::FieldAccessor, ssexpr::FieldAccessorTable>(        \
-              field_accessor, value);                                          \
-    } else {                                                                   \
-      accessors[STRING(arg)] = field_accessor;                                 \
-    }                                                                          \
+#define PB_FIELD_EACH_INIT(N, i, arg)                                                                               \
+  {                                                                                                                 \
+    using FIELD_TYPE = decltype(__root_obj->arg());                                                                 \
+    ssexpr::FieldAccessorTable &accessors = PB_HELPER_TYPE::GetFieldAccessorTable();                                \
+    ssexpr::FieldAccessor field_accessor = [](const void *v) -> ssexpr::FieldValue {                                \
+      const PB_TYPE *data = (const PB_TYPE *)v;                                                                     \
+      return ssexpr::toFieldValue(data->arg());                                                                     \
+    };                                                                                                              \
+    ssexpr::FieldAccessorTable value;                                                                               \
+    if (ssexpr::fillHelperFieldAccessorTable<FIELD_TYPE>(value)) {                                                  \
+      accessors[STRING(arg)] = std::pair<ssexpr::FieldAccessor, ssexpr::FieldAccessorTable>(field_accessor, value); \
+    } else {                                                                                                        \
+      accessors[STRING(arg)] = field_accessor;                                                                      \
+    }                                                                                                               \
   }
 
-#define DEFINE_EXPR_STRUCT_HELPER(pb, ...)                                     \
-  namespace ssexpr {                                                           \
-  template <> template <typename fake> int ExprStructHelper<pb>::InitExpr() {  \
-    static bool once = false;                                                  \
-    if (once) {                                                                \
-      return 0;                                                                \
-    }                                                                          \
-    once = true;                                                               \
-    pb *__root_obj = nullptr;                                                  \
-    using PB_TYPE = pb;                                                        \
-    using PB_HELPER_TYPE = ExprStructHelper<pb>;                               \
-    PASTE(REPEAT_, GET_ARG_COUNT(__VA_ARGS__))                                 \
-    (PB_FIELD_EACH_INIT, 0, __VA_ARGS__)   \ 
-    return 0;                                                                  \
-  }                                                                            \
+#define DEFINE_EXPR_STRUCT_HELPER(pb, ...)         \
+  namespace ssexpr {                               \
+  template <>                                      \
+  template <typename fake>                         \
+  int ExprStructHelper<pb>::InitExpr() {           \
+    static bool once = false;                      \
+    if (once) {                                    \
+      return 0;                                    \
+    }                                              \
+    once = true;                                   \
+    pb *__root_obj = nullptr;                      \
+    using PB_TYPE = pb;                            \
+    using PB_HELPER_TYPE = ExprStructHelper<pb>;   \
+    PASTE(REPEAT_, GET_ARG_COUNT(__VA_ARGS__))     \
+    (PB_FIELD_EACH_INIT, 0, __VA_ARGS__) return 0; \
+  }                                                \
   }
